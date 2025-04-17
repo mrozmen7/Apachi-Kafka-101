@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:15
+    container_name: kafka-postgres
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: kafka_orders
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper

@@ -1,6 +1,8 @@
 package com.ozmenyavuz.kafka;
 
 import com.ozmenyavuz.dto.OrderCreatedEvent;
+import com.ozmenyavuz.entity.OrderEntity;
+import com.ozmenyavuz.repository.OrderRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class KafkaConsumerService {
 
+    private final OrderRepository orderRepository;
+
+    public KafkaConsumerService(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
     @KafkaListener(
             topics = "order-events", // Her mesaj bir “konu (topic)”ya gönderilir. Dinlemek istiyorsan, “Ben şu topic’i dinliyorum” demelisin.
             groupId = "kafka101-json-group", // Aynı groupId‘ye sahip consumer’lar mesajları paylaşır / Farklı groupId’ler aynı mesajı ayrı ayrı alabilir.
@@ -18,13 +26,16 @@ public class KafkaConsumerService {
             containerFactory = "kafkaListenerContainerFactory"
             // Bu listener, JSON mesajı almak için hazırlanmış special factory ile çalışacak.
     )
-    public void consume(OrderCreatedEvent message) {
-        System.out.println("📥 Kafka'dan JSON mesaj alındı: " + message);
+    public void consume(OrderCreatedEvent event) {
+        OrderEntity entity = OrderEntity.builder()
+                .orderId(event.getOrderId())
+                .customerEmail(event.getCustomerEmail())
+                .totalPrice(event.getTotalPrice())
+                .build();
+
+        orderRepository.save(entity);
+        System.out.println("📥 Kafka'dan JSON mesaj alındı ve veritabanına kaydedildi: " + event);
     }
 
-    // Bu method Kafka’dan gelen JSON mesajı alır,
-    // ve bunu otomatik olarak OrderCreatedEvent Java nesnesine çeviri
-    // Bu method:
-    //	•	Biz hiçbir şey çağırmasak bile çalışır.
-    //	•	Mesaj geldiğinde otomatik tetiklenir.
+
 }
