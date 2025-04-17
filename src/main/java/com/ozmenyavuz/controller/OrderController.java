@@ -39,4 +39,16 @@ public class OrderController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    // 4. Delete Islemleri
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable String orderId) {
+        boolean deleted = orderService.deleteByOrderId(orderId);
+        if (deleted) {
+            return ResponseEntity.ok("✅ Sipariş silindi: " + orderId);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

@@ -26,4 +26,14 @@ public class OrderService {
                 .filter(o -> o.getOrderId().equals(orderId))
                 .findFirst();
     }
+
+    public boolean deleteByOrderId(String orderId) {
+        Optional<OrderEntity> existingOrder = getByOrderId(orderId);
+        if (existingOrder.isPresent()) {
+            orderRepository.delete(existingOrder.get());
+            return true;
+        }
+        return false;
+    }
+
 }
